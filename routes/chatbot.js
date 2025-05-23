@@ -112,7 +112,7 @@ router.get('/:flowId/:userId', async (req, res) => {
     }
 
     // Serve chatbot data
-    res.set('Content-Security-Policy', "default-src 'self'; script-src 'self' http://localhost:5000; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*; frame-ancestors *; connect-src 'self' http://localhost:5000");
+    res.set('Content-Security-Policy', "default-src 'self'; script-src 'self' https://custom-gpt-backend-six.vercel.app; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*; frame-ancestors *; connect-src 'self' https://custom-gpt-backend-six.vercel.app");
 
     res.send(`
       <!DOCTYPE html>
@@ -498,7 +498,7 @@ router.get('/script.js', async (req, res) => {
           let chatHistory = [];
           let isTyping = false;
 
-          const fetchUrl = \`http://localhost:5000/api/flow/\${config.userId}/\${config.flowId}\`;
+          const fetchUrl = \`https://custom-gpt-backend-six.vercel.app/api/flow/\${config.userId}/\${config.flowId}\`;
           console.log('[Chatbot] Fetching flow from:', fetchUrl);
           fetch(fetchUrl, { method: 'GET', headers: { 'Accept': 'application/json' } })
             .then((response) => {
