@@ -1,11 +1,12 @@
+
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const router = express.Router();
 const Flow = require('../models/Flow');
 
-// Apply CORS middleware
 router.use(cors({
-  origin: ['https://custom-gpt-backend-six.vercel.app', 'https://anisdev.vercel.app', 'https://custom-gpt-builder-frontends-lvhs.vercel.app'], // Adjust as needed
+  origin: ['https://custom-gpt-backend-six.vercel.app', 'https://anisdev.vercel.app', 'https://custom-gpt-builder-frontends-lvhs.vercel.app'],
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Accept']
 }));
@@ -44,8 +45,9 @@ router.get('/:flowId/:userId', async (req, res) => {
       }
     }
 
-    
-    res.set('Content-Security-Policy',  `default-src 'self'; script-src 'self' https://custom-gpt-backend-six.vercel.app https://anisdev.vercel.app https://custom-gpt-builder-frontends-lvhs.vercel.app'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*; frame-ancestors *; connect-src 'self' https://custom-gpt-backend-six.vercel.app`);
+    res.set('Content-Security-Policy',
+      `default-src 'self'; script-src 'self' https://custom-gpt-backend-six.vercel.app https://anisdev.vercel.app https://custom-gpt-builder-frontends-lvhs.vercel.app 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*; frame-ancestors *; connect-src 'self' https://custom-gpt-backend-six.vercel.app`
+    );
 
     res.send(`
       <!DOCTYPE html>
@@ -90,6 +92,11 @@ router.get('/config.js', (req, res) => {
   `;
   res.set('Content-Type', 'application/javascript');
   res.send(script);
+});
+
+router.get('/public/chatbot-init.js', (req, res) => {
+  res.set('Content-Type', 'application/javascript');
+  res.sendFile(path.join(__dirname, '../public/chatbot-init.js'));
 });
 router.get('/script.js', async (req, res) => {
   try {
@@ -162,9 +169,7 @@ router.get('/script.js', async (req, res) => {
                     padding: 8px;
                     cursor: pointer;
                     transition: background 0.2s;
-                  "
-                  onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'"
-                  onmouseout="this.style.background='transparent'">
+                  ">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
                     </svg>
@@ -179,9 +184,7 @@ router.get('/script.js', async (req, res) => {
                     font-size: 14px;
                     font-weight: 500;
                     transition: background 0.2s;
-                  "
-                  onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'"
-                  onmouseout="this.style.background='transparent'">
+                  ">
                     Reset
                   </button>
                   <button id="close-chat" aria-label="Close chat" style="
@@ -192,9 +195,8 @@ router.get('/script.js', async (req, res) => {
                     padding: 8px;
                     cursor: pointer;
                     display: none;
-                    transition: background 0.2s;"
-                  onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'"
-                  onmouseout="this.style.background='transparent'">
+                    transition: background 0.2s;
+                  ">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M18 6L6 18M6 6l12 12"/>
                     </svg>
@@ -271,10 +273,6 @@ router.get('/script.js', async (req, res) => {
                       font-size: 15px;
                       transition: border-color 0.2s, box-shadow 0.2s;
                     "
-                    onfocus="this.style.borderColor='\${config.theme?.primary || '#6366f1'}'; this.style.boxShadow='0 0 0 3px rgba(99, 102, 241, 0.1)'"
-                    onblur="this.style.borderColor='rgba(209, 213, 219, 0.5)'; this.style.boxShadow='none'"
-                    required
-                    aria-label="Type your message"
                   />
                   <button
                     type="submit"
@@ -289,10 +287,8 @@ router.get('/script.js', async (req, res) => {
                       align-items: center;
                       justify-content: center;
                       transition: background 0.2s, transform 0.2s;
-                      z-index: 1001; /* Ensure send button is above other elements */
+                      z-index: 1001;
                     "
-                    onmouseover="this.style.background='\${config.theme?.secondary || '#4f46e5'}'"
-                    onmouseout="this.style.background='\${config.theme?.primary || '#6366f1'}'"
                   >
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M5 12h14M5 12l6-6m-6 6l6 6"/>
@@ -340,7 +336,7 @@ router.get('/script.js', async (req, res) => {
           toggleIcon.addEventListener('click', () => {
             const isHidden = chatbotWrapper.style.display === 'none' || !chatbotWrapper.style.display;
             chatbotWrapper.style.display = isHidden ? 'flex' : 'none';
-            toggleIcon.style.display = isHidden ? 'none' : 'flex'; // Hide toggle when chatbot opens, show when closes
+            toggleIcon.style.display = isHidden ? 'none' : 'flex';
             if (isHidden) {
               chatbotWrapper.style.opacity = '0';
               chatbotWrapper.style.transform = 'translateY(20px)';
@@ -372,6 +368,12 @@ router.get('/script.js', async (req, res) => {
           // Theme toggle logic
           let isDarkMode = false;
           const themeToggle = container.querySelector('#theme-toggle');
+          themeToggle.addEventListener('mouseover', () => {
+            themeToggle.style.background = 'rgba(255, 255, 255, 0.1)';
+          });
+          themeToggle.addEventListener('mouseout', () => {
+            themeToggle.style.background = 'transparent';
+          });
           themeToggle.addEventListener('click', () => {
             isDarkMode = !isDarkMode;
             chatbotWrapper.style.background = isDarkMode ? 'rgba(31, 41, 55, 0.9)' : 'rgba(255, 255, 255, 0.9)';
@@ -382,11 +384,40 @@ router.get('/script.js', async (req, res) => {
             requestAnimationFrame(renderChat);
           });
 
+          // Reset chat logic
+          const resetChat = container.querySelector('#reset-chat');
+          resetChat.addEventListener('mouseover', () => {
+            resetChat.style.background = 'rgba(255, 255, 255, 0.1)';
+          });
+          resetChat.addEventListener('mouseout', () => {
+            resetChat.style.background = 'transparent';
+          });
+          resetChat.addEventListener('click', () => {
+            const incomingEdges = edges.reduce((acc, edge) => {
+              acc[edge.target] = true;
+              return acc;
+            }, {});
+            const startNode = nodes.find((node) => !incomingEdges[node.id]) || nodes[0];
+            if (startNode) {
+              currentNodeId = startNode.id;
+              chatHistory = [{ node: startNode, userInput: null }];
+              isTyping = false;
+              autoAdvanceTextNodes();
+              requestAnimationFrame(renderChat);
+            }
+          });
+
           // Close button logic for mobile
           const closeChat = container.querySelector('#close-chat');
+          closeChat.addEventListener('mouseover', () => {
+            closeChat.style.background = 'rgba(255, 255, 255, 0.1)';
+          });
+          closeChat.addEventListener('mouseout', () => {
+            closeChat.style.background = 'transparent';
+          });
           closeChat.addEventListener('click', () => {
             chatbotWrapper.style.display = 'none';
-            toggleIcon.style.display = 'flex'; // Show toggle icon when closing chatbot
+            toggleIcon.style.display = 'flex';
           });
           closeChat.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -409,7 +440,7 @@ router.get('/script.js', async (req, res) => {
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
               ">
                 <p style="font-size: 16px; font-weight: 600; margin: 0;">Error: Invalid configuration</p>
-                <button onclick="window.initChatbot()" style="
+                <button id="retry-button" style="
                   background: \${config.theme?.primary || '#6366f1'};
                   color: #ffffff;
                   padding: 10px 20px;
@@ -420,13 +451,21 @@ router.get('/script.js', async (req, res) => {
                   font-size: 14px;
                   font-weight: 500;
                   transition: background 0.2s;
-                "
-                onmouseover="this.style.background='\${config.theme?.secondary || '#4f46e5'}'"
-                onmouseout="this.style.background='\${config.theme?.primary || '#6366f1'}'">
+                ">
                   Retry
                 </button>
               </div>
             \`;
+            const retryButton = container.querySelector('#retry-button');
+            retryButton.addEventListener('mouseover', () => {
+              retryButton.style.background = config.theme?.secondary || '#4f46e5';
+            });
+            retryButton.addEventListener('mouseout', () => {
+              retryButton.style.background = config.theme?.primary || '#6366f1';
+            });
+            retryButton.addEventListener('click', () => {
+              window.initChatbot();
+            });
             return;
           }
 
@@ -485,6 +524,14 @@ router.get('/script.js', async (req, res) => {
                 if (currentNode?.type === 'singleInput' || currentNode?.type === 'aiinput') {
                   const input = inputWrapper.querySelector('input');
                   input.placeholder = currentNode?.type === 'aiinput' ? (currentNode.data.placeholder || 'Type your message...') : 'Enter your message';
+                  input.addEventListener('focus', () => {
+                    input.style.borderColor = config.theme?.primary || '#6366f1';
+                    input.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
+                  });
+                  input.addEventListener('blur', () => {
+                    input.style.borderColor = 'rgba(209, 213, 219, 0.5)';
+                    input.style.boxShadow = 'none';
+                  });
                 }
 
                 messages.innerHTML = chatHistory
@@ -547,8 +594,6 @@ router.get('/script.js', async (req, res) => {
                                       font-weight: 500;
                                       transition: background 0.2s;
                                     "
-                                    onmouseover="this.style.background='\${isDarkMode ? 'rgba(107, 114, 128, 0.9)' : 'rgba(209, 213, 219, 0.9)'}'"
-                                    onmouseout="this.style.background='\${isDarkMode ? 'rgba(75, 85, 99, 0.9)' : 'rgba(229, 231, 235, 0.9)'}'"
                                   >
                                     \${opt}
                                   </button>
@@ -599,8 +644,6 @@ router.get('/script.js', async (req, res) => {
                                         font-size: 14px;
                                         transition: border-color 0.2s, box-shadow 0.2s;
                                       "
-                                      onfocus="this.style.borderColor='\${config.theme?.primary || '#6366f1'}'; this.style.boxShadow='0 0 0 3px rgba(99, 102, 241, 0.1)'"
-                                      onblur="this.style.borderColor='\${isDarkMode ? 'rgba(75, 85, 99, 0.5)' : 'rgba(209, 213, 219, 0.5)'}'; this.style.boxShadow='none'"
                                       \${field.required ? 'required' : ''}
                                       aria-label="\${field.label}"
                                     />
@@ -622,8 +665,6 @@ router.get('/script.js', async (req, res) => {
                                 width: 100%;
                                 transition: background 0.2s;
                               "
-                              onmouseover="this.style.background='\${config.theme?.secondary || '#4f46e5'}'"
-                              onmouseout="this.style.background='\${config.theme?.primary || '#6366f1'}'"
                             >
                               Submit
                             </button>
@@ -730,6 +771,12 @@ router.get('/script.js', async (req, res) => {
                 messages.scrollTop = messages.scrollHeight;
 
                 container.querySelectorAll('button[data-option-index]').forEach((btn) => {
+                  btn.addEventListener('mouseover', () => {
+                    btn.style.background = isDarkMode ? 'rgba(107, 114, 128, 0.9)' : 'rgba(209, 213, 219, 0.9)';
+                  });
+                  btn.addEventListener('mouseout', () => {
+                    btn.style.background = isDarkMode ? 'rgba(75, 85, 99, 0.9)' : 'rgba(229, 231, 235, 0.9)';
+                  });
                   btn.addEventListener('click', () => {
                     const optionIndex = btn.getAttribute('data-option-index');
                     const option = btn.textContent;
@@ -739,6 +786,13 @@ router.get('/script.js', async (req, res) => {
                 });
 
                 container.querySelectorAll('form[id^="chatbot-form-"]').forEach((form) => {
+                  const submitButton = form.querySelector('button[type="submit"]');
+                  submitButton.addEventListener('mouseover', () => {
+                    submitButton.style.background = config.theme?.secondary || '#4f46e5';
+                  });
+                  submitButton.addEventListener('mouseout', () => {
+                    submitButton.style.background = config.theme?.primary || '#6366f1';
+                  });
                   form.addEventListener('submit', (e) => {
                     e.preventDefault();
                     const formData = new FormData(form);
@@ -750,6 +804,13 @@ router.get('/script.js', async (req, res) => {
 
                 const bottomInputForm = container.querySelector('#chatbot-bottom-input');
                 if (bottomInputForm) {
+                  const submitButton = bottomInputForm.querySelector('button[type="submit"]');
+                  submitButton.addEventListener('mouseover', () => {
+                    submitButton.style.background = config.theme?.secondary || '#4f46e5';
+                  });
+                  submitButton.addEventListener('mouseout', () => {
+                    submitButton.style.background = config.theme?.primary || '#6366f1';
+                  });
                   bottomInputForm.addEventListener('submit', (e) => {
                     e.preventDefault();
                     const formData = new FormData(bottomInputForm);
@@ -759,21 +820,6 @@ router.get('/script.js', async (req, res) => {
                     bottomInputForm.reset();
                   });
                 }
-
-                container.querySelector('#reset-chat')?.addEventListener('click', () => {
-                  const incomingEdges = edges.reduce((acc, edge) => {
-                    acc[edge.target] = true;
-                    return acc;
-                  }, {});
-                  const startNode = nodes.find((node) => !incomingEdges[node.id]) || nodes[0];
-                  if (startNode) {
-                    currentNodeId = startNode.id;
-                    chatHistory = [{ node: startNode, userInput: null }];
-                    isTyping = false;
-                    autoAdvanceTextNodes();
-                    requestAnimationFrame(renderChat);
-                  }
-                });
               };
 
               const handleInteraction = (nodeId, userInput, optionIndex = null) => {
@@ -826,7 +872,7 @@ router.get('/script.js', async (req, res) => {
                   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
                 ">
                   <p style="font-size: 16px; font-weight: 600; margin: 0;">Error loading assistant: \${error.message}</p>
-                  <button onclick="window.initChatbot()" style="
+                  <button id="retry-button" style="
                     background: \${config.theme?.primary || '#6366f1'};
                     color: #ffffff;
                     padding: 10px 20px;
@@ -837,13 +883,21 @@ router.get('/script.js', async (req, res) => {
                     font-size: 14px;
                     font-weight: 500;
                     transition: background 0.2s;
-                  "
-                  onmouseover="this.style.background='\${config.theme?.secondary || '#4f46e5'}'"
-                  onmouseout="this.style.background='\${config.theme?.primary || '#6366f1'}'">
+                  ">
                     Retry
                   </button>
                 </div>
               \`;
+              const retryButton = container.querySelector('#retry-button');
+              retryButton.addEventListener('mouseover', () => {
+                retryButton.style.background = config.theme?.secondary || '#4f46e5';
+              });
+              retryButton.addEventListener('mouseout', () => {
+                retryButton.style.background = config.theme?.primary || '#6366f1';
+              });
+              retryButton.addEventListener('click', () => {
+                window.initChatbot();
+              });
             });
 
           const styleSheet = document.createElement('style');
@@ -929,8 +983,4 @@ router.get('/script.js', async (req, res) => {
   }
 });
 
-router.get('/chatbot-init.js', (req, res) => {
-  res.set('Content-Type', 'application/javascript');
-  res.sendFile(path.join(__dirname, '../public/chatbot-init.js'));
-});
 module.exports = router;
